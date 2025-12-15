@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
+/* ===== BODY ===== */
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
@@ -15,18 +16,50 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== Fade-in animation ===== */
+/* ===== NAVBAR CENTERED ===== */
+nav {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  background: rgba(0,0,0,0.5);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav ul {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+nav ul li a:hover {
+  color: #fff;
+}
+
+/* ===== FADE-IN ANIMATION ===== */
 .fade {
   animation: fadeIn 0.8s ease-in-out;
 }
+
 @keyframes fadeIn {
   0% {opacity:0; transform: translateY(20px);}
   100% {opacity:1; transform: translateY(0);}
 }
 
 /* ===== PASSWORD SCREEN ===== */
-#password-screen, #register-screen, #login-screen {
-  height: 100vh;
+#password-screen {
+  height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,13 +67,13 @@ body {
   gap: 20px;
 }
 
-.password-container, .input-container {
+.password-container {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.password-container input, .input-container input {
+.password-container input {
   padding: 12px 40px 12px 12px;
   font-size: 16px;
   border-radius: 6px;
@@ -55,7 +88,7 @@ body {
   color: #000;
 }
 
-button {
+#password-screen button {
   padding: 12px 25px;
   font-size: 16px;
   border: none;
@@ -66,7 +99,10 @@ button {
   cursor: pointer;
   transition: 0.3s;
 }
-button:hover { background: #fff; }
+
+#password-screen button:hover {
+  background: #fff;
+}
 
 /* ===== SHOP CONTENT ===== */
 #shop-content {
@@ -88,6 +124,7 @@ button:hover { background: #fff; }
   border-radius: 12px;
   transition: transform 0.3s, box-shadow 0.3s;
 }
+
 .item-box:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0,0,0,0.3);
@@ -117,7 +154,10 @@ button:hover { background: #fff; }
   cursor: pointer;
   transition: 0.2s;
 }
-.counter button:hover { background: #fff; }
+
+.counter button:hover {
+  background: #fff;
+}
 
 .add-btn {
   padding: 8px 20px;
@@ -129,8 +169,12 @@ button:hover { background: #fff; }
   cursor: pointer;
   transition: 0.3s;
 }
-.add-btn:hover { background: #fff; }
 
+.add-btn:hover {
+  background: #fff;
+}
+
+/* ===== ORDER LIST ===== */
 #order-list {
   margin-top: 40px;
   padding: 25px;
@@ -150,40 +194,35 @@ button:hover { background: #fff; }
   margin-top: 20px;
   transition: 0.3s;
 }
-#send-btn:hover { background: #00ff00; }
+
+#send-btn:hover {
+  background: #00ff00;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
+
 <body>
 
-<!-- REGISTER SCREEN -->
-<div id="register-screen" class="fade">
-  <h2>Register</h2>
-  <div class="input-container">
-    <input type="text" id="reg-username" placeholder="Enter your name">
-  </div>
-  <div class="input-container">
-    <input type="email" id="reg-email" placeholder="Email">
-  </div>
-  <div class="input-container">
-    <input type="password" id="reg-password" placeholder="Password">
-  </div>
-  <button onclick="registerUser()">Register</button>
-  <p>Already have an account? <span style="text-decoration: underline; cursor:pointer;" onclick="showLogin()">Login</span></p>
-</div>
+<!-- NAVBAR CENTERED -->
+<nav>
+  <ul>
+    <li><a href="home.html">Home</a></li>
+    <li><a href="archive.html">Archive</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+  </ul>
+</nav>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="fade" style="display:none;">
-  <h2>Login</h2>
-  <div class="input-container">
-    <input type="text" id="login-username" placeholder="Username">
+<!-- PASSWORD SCREEN -->
+<div id="password-screen" class="fade">
+  <h2>Enter Password</h2>
+  <div class="password-container">
+    <input type="password" id="pass" onkeydown="if(event.key==='Enter'){checkPass();}">
+    <span class="toggle-eye" onclick="togglePassword()">👁️</span>
   </div>
-  <div class="input-container">
-    <input type="password" id="login-password" placeholder="Password">
-  </div>
-  <button onclick="loginUser()">Login</button>
-  <p>Don't have an account? <span style="text-decoration: underline; cursor:pointer;" onclick="showRegister()">Register</span></p>
+  <button onclick="checkPass()">Enter</button>
 </div>
 
 <!-- SHOP CONTENT -->
@@ -242,95 +281,67 @@ button:hover { background: #fff; }
 </div>
 
 <script>
-emailjs.init("R343iEUpx16F3VYfz");
-
-let order = [];
-
-// ===== COUNTER =====
-function change(item, amount){
-  let el = document.getElementById(item);
-  let num = parseInt(el.innerText) + amount;
-  if(num<0) num=0;
-  el.innerText = num;
-}
-
-// ===== ADD ITEMS =====
-function addItem(name){
-  let qty = document.getElementById(name.toLowerCase()).innerText;
-  if(qty==0) return alert("Quantity must be > 0");
-  order.push(`${name} x ${qty}`);
-  document.getElementById("order-items").innerHTML = order.join("<br>");
-}
-
-// ===== SEND ORDER =====
-function sendOrder(){
-  if(order.length==0){ alert("No items added"); return; }
-
-  const username = localStorage.getItem('sgwen_username') || "SGWEN User";
-
-  emailjs.send("service_21rqokl","template_hwaelip",{
-    username: username,
-    order_text: order.join("\n")
-  }).then(()=>{
-    const sendBtn = document.getElementById("send-btn");
-    sendBtn.innerText = "Sent";
-
-    order=[];
-    document.getElementById("order-items").innerHTML = "";
-    document.getElementById("tent").innerText="0";
-    document.getElementById("rope").innerText="0";
-    document.getElementById("wood").innerText="0";
-    document.getElementById("pots").innerText="0";
-
-    setTimeout(()=>{ sendBtn.innerText="Send Order"; sendBtn.disabled=false; }, 2000);
-
-  }, (err)=>{
-    alert("Error sending order: "+JSON.stringify(err));
-  });
-}
-
-// ===== REGISTER & LOGIN =====
-function registerUser(){
-  const username = document.getElementById("reg-username").value;
-  const email = document.getElementById("reg-email").value;
-  const password = document.getElementById("reg-password").value;
-
-  if(!username || !email || !password){ alert("Fill all fields"); return; }
-
-  localStorage.setItem("sgwen_username", username);
-  localStorage.setItem("sgwen_email", email);
-  localStorage.setItem("sgwen_password", password);
-
-  alert("Registered!");
-  document.getElementById("register-screen").style.display="none";
-  document.getElementById("shop-content").style.display="block";
-}
-
-function showLogin(){
-  document.getElementById("register-screen").style.display="none";
-  document.getElementById("login-screen").style.display="block";
-}
-
-function showRegister(){
-  document.getElementById("login-screen").style.display="none";
-  document.getElementById("register-screen").style.display="block";
-}
-
-function loginUser(){
-  const username = document.getElementById("login-username").value;
-  const password = document.getElementById("login-password").value;
-
-  const storedUser = localStorage.getItem("sgwen_username");
-  const storedPass = localStorage.getItem("sgwen_password");
-
-  if(username === storedUser && password === storedPass){
-    alert("Login successful!");
-    document.getElementById("login-screen").style.display="none";
-    document.getElementById("shop-content").style.display="block";
-  } else {
-    alert("Wrong credentials!");
+  // PASSWORD FUNCTIONS
+  function checkPass() {
+    const pass = document.getElementById("pass").value;
+    const correct = "sgwen123";
+    if(pass === correct){
+      document.getElementById("password-screen").style.display="none";
+      document.getElementById("shop-content").style.display="block";
+    } else { alert("Wrong password!"); }
   }
-}
+
+  function togglePassword() {
+    const input = document.getElementById("pass");
+    input.type = input.type === "password" ? "text" : "password";
+  }
+
+  // COUNTER
+  function change(item, amount){
+    let el = document.getElementById(item);
+    let num = parseInt(el.innerText) + amount;
+    if(num<0) num=0;
+    el.innerText = num;
+  }
+
+  // ADD ITEMS
+  let order = [];
+  function addItem(name){
+    let qty = document.getElementById(name.toLowerCase()).innerText;
+    if(qty==0) return alert("Quantity must be > 0");
+    order.push(`${name} x ${qty}`);
+    document.getElementById("order-items").innerHTML = order.join("<br>");
+  }
+
+  // EMAILJS
+  emailjs.init("R343iEUpx16F3VYfz");
+
+  function sendOrder(){
+    if(order.length==0){ alert("No items added"); return; }
+
+    // احصل على اسم المستخدم من localStorage
+    let username = localStorage.getItem("sgwen_username") || "SGWEN User";
+
+    emailjs.send("service_21rqokl","template_hwaelip",{
+      username: username,
+      order_text: order.join("\n")
+    }).then(()=>{
+      const sendBtn = document.getElementById("send-btn");
+      sendBtn.innerText = "Sent";
+
+      order=[];
+      document.getElementById("order-items").innerHTML = "";
+      document.getElementById("tent").innerText="0";
+      document.getElementById("rope").innerText="0";
+      document.getElementById("wood").innerText="0";
+      document.getElementById("pots").innerText="0";
+
+      setTimeout(()=>{ sendBtn.innerText="Send Order"; sendBtn.disabled=false; }, 2000);
+
+    }, (err)=>{
+      alert("Error sending order: "+JSON.stringify(err));
+    });
+  }
 </script>
 
 </body>
