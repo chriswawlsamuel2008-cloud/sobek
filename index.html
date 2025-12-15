@@ -3,131 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - SGWEN X</title>
-
+<title>Login / Register - SGWEN X</title>
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  color: #fff;
-}
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
 
-.container {
-  width: 360px;
-  background: rgba(255,255,255,0.15);
-  padding: 30px;
-  border-radius: 18px;
-  text-align: center;
-  animation: fade 1.2s ease;
-}
+  .container {
+    background: rgba(255,255,255,0.1);
+    padding: 40px;
+    border-radius: 20px;
+    width: 350px;
+    text-align: center;
+  }
 
-h2 {
-  margin-bottom: 20px;
-}
+  h2 {
+    margin-bottom: 20px;
+  }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 10px;
-  font-size: 1em;
-}
+  input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+  }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 10px;
-  background: #ffd700;
-  font-size: 1.1em;
-  font-weight: bold;
-  cursor: pointer;
-}
+  button {
+    width: 95%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: none;
+    background-color: #ffd700;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
 
-button:hover {
-  background: #fff;
-}
+  button:hover {
+    background-color: #fff;
+    color: #6a11cb;
+  }
 
-.switch {
-  margin-top: 15px;
-  font-size: 0.95em;
-}
+  .switch {
+    margin-top: 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    color: #ffd700;
+  }
 
-.switch span {
-  color: #ffd700;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-@keyframes fade {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  .switch:hover { color: #fff; }
 </style>
 </head>
-
 <body>
 
-<div class="container" id="loginBox">
-  <h2>Login</h2>
-  <input type="text" id="loginName" placeholder="Your Name">
-  <button onclick="login()">Login</button>
-
-  <div class="switch">
-    Don’t have an account?
-    <span onclick="showRegister()">Register</span>
-  </div>
-</div>
-
-<div class="container" id="registerBox" style="display:none;">
-  <h2>Register</h2>
-  <input type="text" id="registerName" placeholder="Your Name">
-  <button onclick="register()">Register</button>
-
-  <div class="switch">
-    Already have an account?
-    <span onclick="showLogin()">Login</span>
-  </div>
+<div class="container" id="authContainer">
+  <h2 id="formTitle">Login</h2>
+  <input type="text" id="loginName" placeholder="Name" required>
+  <input type="email" id="loginEmail" placeholder="Email" required>
+  <input type="password" id="loginPassword" placeholder="Password" required>
+  <button id="submitBtn">Login</button>
+  <div class="switch" id="toggleForm">Don’t have an account? Register</div>
 </div>
 
 <script>
-function showRegister() {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("registerBox").style.display = "block";
-}
+const container = document.getElementById('authContainer');
+const formTitle = document.getElementById('formTitle');
+const toggleForm = document.getElementById('toggleForm');
+const submitBtn = document.getElementById('submitBtn');
+
+let isLogin = true;
 
 function showLogin() {
-  document.getElementById("registerBox").style.display = "none";
-  document.getElementById("loginBox").style.display = "block";
+  isLogin = true;
+  formTitle.innerText = 'Login';
+  submitBtn.innerText = 'Login';
+  toggleForm.innerText = 'Don’t have an account? Register';
+  document.getElementById('loginName').style.display = 'none';
 }
 
-function register() {
-  const name = document.getElementById("registerName").value;
-  if(name === "") {
-    alert("Please enter your name");
-    return;
-  }
-  localStorage.setItem("sgwenUser", name);
-  alert("Registered successfully");
-  window.location.href = "home.html";
+function showRegister() {
+  isLogin = false;
+  formTitle.innerText = 'Register';
+  submitBtn.innerText = 'Register';
+  toggleForm.innerText = 'Already have an account? Login';
+  document.getElementById('loginName').style.display = 'block';
 }
 
-function login() {
-  const name = document.getElementById("loginName").value;
-  if(name === "") {
-    alert("Please enter your name");
-    return;
+// افتراضي: نعمل check لو المستخدم مسجل قبل كده
+window.onload = function() {
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  if (users.length > 0) showLogin();
+  else showRegister();
+};
+
+toggleForm.addEventListener('click', () => {
+  if (isLogin) showRegister();
+  else showLogin();
+});
+
+submitBtn.addEventListener('click', () => {
+  const name = document.getElementById('loginName').value.trim();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+  if (isLogin) {
+    // Login
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+      alert(`Welcome back, ${user.name}!`);
+      // Redirect أو فتح الموقع الرئيسي
+      window.location.href = 'home.html';
+    } else {
+      alert('Invalid email or password!');
+    }
+  } else {
+    // Register
+    if (!name || !email || !password) {
+      alert('Please fill all fields!');
+      return;
+    }
+    if (users.find(u => u.email === email)) {
+      alert('Email already registered!');
+      return;
+    }
+    users.push({name, email, password});
+    localStorage.setItem('users', JSON.stringify(users));
+    alert('Registration successful! You can now login.');
+    showLogin();
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
   }
-  localStorage.setItem("sgwenUser", name);
-  window.location.href = "home.html";
-}
+});
 </script>
 
 </body>
