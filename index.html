@@ -1,31 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SegWenX - Login / Register</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - SGWEN X</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+}
+
+.container {
+  width: 360px;
+  background: rgba(255,255,255,0.15);
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  animation: fade 1.2s ease;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 10px;
+  background: #ffd700;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #fff;
+}
+
+.switch {
+  margin-top: 15px;
+  font-size: 0.95em;
+}
+
+.switch span {
+  color: #ffd700;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
+
 <body>
 
-<div class="auth-container">
-    <h2>Welcome to SgwenX</h2>
+<div class="container" id="loginBox">
+  <h2>Login</h2>
+  <input type="text" id="loginName" placeholder="Your Name">
+  <button onclick="login()">Login</button>
 
-    <div class="form-box">
-        <h3>Register</h3>
-        <input id="regName" type="text" placeholder="Full Name">
-        <input id="regEmail" type="email" placeholder="Email">
-        <input id="regPhone" type="text" placeholder="Phone Number">
-        <input id="regPass" type="password" placeholder="Password">
-        <button onclick="register()">Register</button>
-    </div>
-
-    <div class="form-box">
-        <h3>Login</h3>
-        <input id="logEmail" type="email" placeholder="Email">
-        <input id="logPass" type="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-    </div>
+  <div class="switch">
+    Don’t have an account?
+    <span onclick="showRegister()">Register</span>
+  </div>
 </div>
 
-<script src="script.js"></script>
+<div class="container" id="registerBox" style="display:none;">
+  <h2>Register</h2>
+  <input type="text" id="registerName" placeholder="Your Name">
+  <button onclick="register()">Register</button>
+
+  <div class="switch">
+    Already have an account?
+    <span onclick="showLogin()">Login</span>
+  </div>
+</div>
+
+<script>
+function showRegister() {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("registerBox").style.display = "block";
+}
+
+function showLogin() {
+  document.getElementById("registerBox").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
+}
+
+function register() {
+  const name = document.getElementById("registerName").value;
+  if(name === "") {
+    alert("Please enter your name");
+    return;
+  }
+  localStorage.setItem("sgwenUser", name);
+  alert("Registered successfully");
+  window.location.href = "home.html";
+}
+
+function login() {
+  const name = document.getElementById("loginName").value;
+  if(name === "") {
+    alert("Please enter your name");
+    return;
+  }
+  localStorage.setItem("sgwenUser", name);
+  window.location.href = "home.html";
+}
+</script>
+
 </body>
 </html>
