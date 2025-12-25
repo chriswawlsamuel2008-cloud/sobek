@@ -4,182 +4,153 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login / Register - SGWEN X</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  background: rgba(255,255,255,0.1);
-  padding: 40px;
-  border-radius: 20px;
-  width: 350px;
-  text-align: center;
-}
-
-h2 { margin-bottom: 20px; }
-
-input, select {
-  width: 90%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: none;
-}
-
-button {
-  width: 95%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 12px;
-  border: none;
-  background-color: #ffd700;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  background-color: #fff;
-  color: #6a11cb;
-}
-
-.switch {
-  margin-top: 15px;
-  font-size: 0.9em;
-  cursor: pointer;
-  color: #ffd700;
-}
-
-.switch:hover { color: #fff; }
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .container {
+    background: rgba(255,255,255,0.1);
+    padding: 40px;
+    border-radius: 20px;
+    width: 350px;
+    text-align: center;
+  }
+  h2 { margin-bottom: 20px; }
+  input, select {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+  }
+  button {
+    width: 95%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: none;
+    background-color: #ffd700;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover { background-color: #fff; color: #6a11cb; }
+  .switch { margin-top: 15px; font-size: 0.9em; cursor: pointer; color: #ffd700; }
+  .switch:hover { color: #fff; }
 </style>
 </head>
 <body>
 
 <div class="container" id="authContainer">
   <h2 id="formTitle">Login</h2>
-  <input type="text" id="name" placeholder="Name">
-  <input type="email" id="email" placeholder="Email">
-  <input type="text" id="phone" placeholder="Phone Number">
-  <input type="password" id="password" placeholder="Password">
-  <select id="role">
-    <option value="">Select Role</option>
-    <option value="Leader">Leader</option>
-    <option value="Member">Member</option>
+  <input type="text" id="loginName" placeholder="Name" required>
+  <input type="email" id="loginEmail" placeholder="Email" required>
+  <input type="password" id="loginPassword" placeholder="Password" required>
+  <select id="loginRole">
+    <option value="member">Member</option>
+    <option value="leader">Leader</option>
   </select>
   <button id="submitBtn">Login</button>
   <div class="switch" id="toggleForm">Don’t have an account? Register</div>
 </div>
 
-<script>
-  // Firebase config (حط الـ config بتاعك هنا)
-  const firebaseConfig = {
-    apiKey: "API_KEY",
-    authDomain: "PROJECT_ID.firebaseapp.com",
-    projectId: "PROJECT_ID",
-    storageBucket: "PROJECT_ID.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
-  };
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyBztAZOaS3hJ0t1y1p6uNIDjc2H7qcNyN8",
+  authDomain: "sobek-be3d3.firebaseapp.com",
+  projectId: "sobek-be3d3",
+  storageBucket: "sobek-be3d3.firebasestorage.app",
+  messagingSenderId: "289954935776",
+  appId: "1:289954935776:web:b1a98fd4c673d7ab52f185"
+};
 
-  const container = document.getElementById('authContainer');
-  const formTitle = document.getElementById('formTitle');
-  const toggleForm = document.getElementById('toggleForm');
-  const submitBtn = document.getElementById('submitBtn');
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  let isLogin = true;
+const formTitle = document.getElementById('formTitle');
+const toggleForm = document.getElementById('toggleForm');
+const submitBtn = document.getElementById('submitBtn');
+const nameInput = document.getElementById('loginName');
+const emailInput = document.getElementById('loginEmail');
+const passwordInput = document.getElementById('loginPassword');
+const roleInput = document.getElementById('loginRole');
 
-  function showLogin(){
-    isLogin = true;
-    formTitle.innerText = 'Login';
-    submitBtn.innerText = 'Login';
-    toggleForm.innerText = 'Don’t have an account? Register';
-    document.getElementById('name').style.display='none';
-    document.getElementById('phone').style.display='none';
-    document.getElementById('role').style.display='none';
-  }
+let isLogin = true;
 
-  function showRegister(){
-    isLogin = false;
-    formTitle.innerText = 'Register';
-    submitBtn.innerText = 'Register';
-    toggleForm.innerText = 'Already have an account? Login';
-    document.getElementById('name').style.display='block';
-    document.getElementById('phone').style.display='block';
-    document.getElementById('role').style.display='block';
-  }
+function showLogin() {
+  isLogin = true;
+  formTitle.innerText = 'Login';
+  submitBtn.innerText = 'Login';
+  toggleForm.innerText = 'Don’t have an account? Register';
+  nameInput.style.display = 'none';
+  roleInput.style.display = 'none';
+}
 
-  window.onload = function(){
-    showLogin();
-  };
+function showRegister() {
+  isLogin = false;
+  formTitle.innerText = 'Register';
+  submitBtn.innerText = 'Register';
+  toggleForm.innerText = 'Already have an account? Login';
+  nameInput.style.display = 'block';
+  roleInput.style.display = 'block';
+}
 
-  toggleForm.addEventListener('click', ()=>{
-    if(isLogin) showRegister();
-    else showLogin();
-  });
+// Check if user already exists in localStorage
+window.onload = function() {
+  showLogin();
+};
 
-  submitBtn.addEventListener('click', ()=>{
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
+toggleForm.addEventListener('click', () => {
+  if (isLogin) showRegister();
+  else showLogin();
+});
 
-    if(isLogin){
-      // LOGIN
-      auth.signInWithEmailAndPassword(email,password)
-      .then((userCredential)=>{
-        const uid = userCredential.user.uid;
-        db.collection('users').doc(uid).get().then(doc=>{
-          const data = doc.data();
-          alert(`Welcome back, ${data.name} (${data.role})!`);
-          window.location.href = 'home.html';
-        });
-      })
-      .catch((err)=>{
-        alert(err.message);
-      });
+submitBtn.addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  const role = roleInput.value;
+
+  try {
+    if (isLogin) {
+      // Login
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      alert(`Welcome back, ${userDoc.data().name}!`);
+      // Redirect
+      window.location.href = 'home.html';
     } else {
-      // REGISTER
-      if(!name || !email || !password || !phone || !role){
-        alert('Please fill all fields!');
-        return;
-      }
-      auth.createUserWithEmailAndPassword(email,password)
-      .then((userCredential)=>{
-        const uid = userCredential.user.uid;
-        db.collection('users').doc(uid).set({
-          name, email, phone, role
-        }).then(()=>{
-          alert('Registration successful! You can now login.');
-          showLogin();
-          document.getElementById('name').value='';
-          document.getElementById('email').value='';
-          document.getElementById('phone').value='';
-          document.getElementById('password').value='';
-          document.getElementById('role').value='';
-        });
-      })
-      .catch(err=>{
-        alert(err.message);
+      // Register
+      if (!name || !email || !password) return alert('Please fill all fields!');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        name: name,
+        email: email,
+        role: role
       });
+      alert('Registration successful! You can now login.');
+      showLogin();
+      nameInput.value = '';
+      emailInput.value = '';
+      passwordInput.value = '';
     }
-  });
+  } catch (err) {
+    alert(err.message);
+  }
+});
 </script>
 
 </body>
